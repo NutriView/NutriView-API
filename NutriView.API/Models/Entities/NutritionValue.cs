@@ -1,0 +1,29 @@
+﻿using System;
+
+namespace NutriView.API.Models.Entities
+{
+    public class NutritionValue
+    {
+        public Guid NutritionValueId { get; set; }
+
+        public Guid FoodId { get; set; }
+
+        public float Calories { get; set; }
+
+        public float Protein { get; set; }
+
+        public float Carbs { get; set; }
+
+        public float Fat { get; set; }
+
+        public float Sugar { get; set; }
+
+        public float Fiber { get; set; }
+
+        public float Sodium { get; set; }
+
+        public string MeasurementBase { get; set; } = "100g";
+
+        public Food Food { get; set; } = null!;
+    }
+}

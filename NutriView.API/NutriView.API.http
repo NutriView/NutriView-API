@@ -1,0 +1,6 @@
+@NutriView.API_HostAddress = http://localhost:5232
+
+GET {{NutriView.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
