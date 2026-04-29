@@ -1,24 +1,26 @@
 using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
+using NutriView.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
 builder.Services.AddControllers();
 
-// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-// 🔥 Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IFoodService, FoodService>();
+builder.Services.AddScoped<INutritionService, NutritionService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFoodEntryService, FoodEntryService>();
+
 var app = builder.Build();
 
-// 🔥 Swagger middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
