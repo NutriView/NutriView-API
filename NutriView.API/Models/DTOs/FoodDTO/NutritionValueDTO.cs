@@ -9,6 +9,7 @@
         public float Sugar { get; set; }
         public float Fiber { get; set; }
         public float Sodium { get; set; }
+        public float Alcohol { get; set; }
 
         public string MeasurementBase { get; set; } = "100g";
     }

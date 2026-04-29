@@ -21,7 +21,7 @@ namespace NutriView.API.Models.Entities
         public float Fiber { get; set; }
 
         public float Sodium { get; set; }
-
+        public float Alcohol { get; set; } = 0;
         public string MeasurementBase { get; set; } = "100g";
 
         public Food Food { get; set; } = null!;

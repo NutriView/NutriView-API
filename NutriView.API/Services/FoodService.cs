@@ -8,10 +8,12 @@ namespace NutriView.API.Services
     public class FoodService : IFoodService
     {
         private readonly ApplicationDbContext _context;
+        private readonly INutritionService _nutritionService;
 
-        public FoodService(ApplicationDbContext context)
+        public FoodService(ApplicationDbContext context, INutritionService nutritionService)
         {
             _context = context;
+            _nutritionService = nutritionService;
         }
 
         public async Task<IEnumerable<FoodResponseDTO>> GetAllAsync()
@@ -69,6 +71,13 @@ namespace NutriView.API.Services
 
         public async Task<FoodResponseDTO> CreateAsync(FoodCreateDTO dto)
         {
+            var calories = _nutritionService.CalculateCalories(
+                dto.Nutrition.Protein,
+                dto.Nutrition.Carbs,
+                dto.Nutrition.Fat,
+                dto.Nutrition.Fiber,
+                dto.Nutrition.Alcohol);
+
             var food = new Food
             {
                 FoodId = Guid.NewGuid(),
@@ -79,7 +88,7 @@ namespace NutriView.API.Services
                 NutritionValue = new NutritionValue
                 {
                     NutritionValueId = Guid.NewGuid(),
-                    Calories = dto.Nutrition.Calories,
+                    Calories = calories,
                     Protein = dto.Nutrition.Protein,
                     Carbs = dto.Nutrition.Carbs,
                     Fat = dto.Nutrition.Fat,
@@ -108,10 +117,16 @@ namespace NutriView.API.Services
             food.Name = dto.Name;
             food.Brand = dto.Brand;
             food.IsGlobal = dto.IsGlobal;
+            var calories = _nutritionService.CalculateCalories(
+               dto.Nutrition.Protein,
+               dto.Nutrition.Carbs,
+               dto.Nutrition.Fat,
+               dto.Nutrition.Fiber,
+               dto.Nutrition.Alcohol);
 
             if (food.NutritionValue != null)
             {
-                food.NutritionValue.Calories = dto.Nutrition.Calories;
+                food.NutritionValue.Calories = calories;
                 food.NutritionValue.Protein = dto.Nutrition.Protein;
                 food.NutritionValue.Carbs = dto.Nutrition.Carbs;
                 food.NutritionValue.Fat = dto.Nutrition.Fat;
