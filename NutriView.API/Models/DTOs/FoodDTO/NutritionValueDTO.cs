@@ -1,4 +1,6 @@
-﻿namespace NutriView.API.Models.DTOs
+﻿using NutriView.API.Helpers;
+
+namespace NutriView.API.Models.DTOs
 {
     public class NutritionValueDTO
     {
@@ -11,6 +13,6 @@
         public float Sodium { get; set; }
         public float Alcohol { get; set; }
 
-        public string MeasurementBase { get; set; } = "100g";
+        public MeasurementBaseEnum MeasurementBase { get; set; } = MeasurementBaseEnum.Per100g;
     }
 }

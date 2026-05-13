@@ -1,4 +1,5 @@
 ﻿using System;
+using NutriView.API.Helpers;
 
 namespace NutriView.API.Models.Entities
 {
@@ -22,7 +23,7 @@ namespace NutriView.API.Models.Entities
 
         public float Sodium { get; set; }
         public float Alcohol { get; set; } = 0;
-        public string MeasurementBase { get; set; } = "100g";
+        public MeasurementBaseEnum MeasurementBase { get; set; } = MeasurementBaseEnum.Per100g;
 
         public Food Food { get; set; } = null!;
     }
