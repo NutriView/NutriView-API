@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NutriView.API.Helpers;
 
 namespace NutriView.API.Models.Entities
 {
@@ -21,10 +22,18 @@ namespace NutriView.API.Models.Entities
 
         public int? Age { get; set; }
 
+        public GenderEnum? Gender { get; set; }
+
+        public string? Image { get; set; }
+
+        public Guid? NutritionDailyGoalId { get; set; }
+
         public ICollection<FoodEntry> FoodEntries { get; set; } = new List<FoodEntry>();
 
         public ICollection<UploadedImage> UploadedImages { get; set; } = new List<UploadedImage>();
 
         public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
+
+        public NutritionValue? NutritionDailyGoal { get; set; }
     }
 }

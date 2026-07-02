@@ -1,4 +1,6 @@
-﻿namespace NutriView.API.Models.DTOs
+﻿using NutriView.API.Helpers;
+
+namespace NutriView.API.Models.DTOs
 {
     public class UserResponseDTO
     {
@@ -15,5 +17,11 @@
         public int? Age { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public GenderEnum? Gender { get; set; }
+
+        public string? Image { get; set; }
+
+        public NutritionValueDTO? NutritionDailyGoal { get; set; }
     }
 }
