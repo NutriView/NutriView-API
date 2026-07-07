@@ -1,0 +1,82 @@
+@host = http://localhost:5199
+@alex = 40074DA3-73AB-4329-94CD-59ED58CD2D27
+@maria = A9041B4A-A77B-46D4-9D16-C1981E251EFA
+
+### 1. Create a reminder for Alex (Breakfast, 08:00) -> 201 Created
+# @name createAlex
+POST {{host}}/api/Reminder
+Content-Type: application/json
+
+{
+  "userId": "{{alex}}",
+  "mealId": 1,
+  "timeOfDay": "08:00:00",
+  "isActive": true
+}
+
+### 2. Create a reminder for Maria (Dinner, 19:30) -> 201 Created
+POST {{host}}/api/Reminder
+Content-Type: application/json
+
+{
+  "userId": "{{maria}}",
+  "mealId": 3,
+  "timeOfDay": "19:30:00",
+  "isActive": true
+}
+
+### 3. Get all reminders for Alex -> 200 OK
+GET {{host}}/api/Reminder/user/{{alex}}
+
+### 4. Get a single reminder by id (uses id from request #1) -> 200 OK
+GET {{host}}/api/Reminder/{{createAlex.response.body.reminderId}}
+
+### 5. Update Alex's reminder (switch to Lunch, 13:00, deactivate) -> 204 No Content
+PUT {{host}}/api/Reminder/{{createAlex.response.body.reminderId}}
+Content-Type: application/json
+
+{
+  "mealId": 2,
+  "timeOfDay": "13:00:00",
+  "isActive": false
+}
+
+### 6. Delete Alex's reminder -> 204 No Content
+DELETE {{host}}/api/Reminder/{{createAlex.response.body.reminderId}}
+
+### --- Validation / error cases ---
+
+### 7. Create with a non-existent user -> 400 "User not found"
+POST {{host}}/api/Reminder
+Content-Type: application/json
+
+{
+  "userId": "11111111-1111-1111-1111-111111111111",
+  "mealId": 1,
+  "timeOfDay": "08:00:00",
+  "isActive": true
+}
+
+### 8. Create with an invalid meal id -> 400 "Meal not found"
+POST {{host}}/api/Reminder
+Content-Type: application/json
+
+{
+  "userId": "{{alex}}",
+  "mealId": 99,
+  "timeOfDay": "08:00:00",
+  "isActive": true
+}
+
+### 9. Update with an invalid meal id -> 400 "Meal not found"
+PUT {{host}}/api/Reminder/{{createAlex.response.body.reminderId}}
+Content-Type: application/json
+
+{
+  "mealId": 99,
+  "timeOfDay": "13:00:00",
+  "isActive": true
+}
+
+### 10. Get a reminder that does not exist -> 404 Not Found
+GET {{host}}/api/Reminder/22222222-2222-2222-2222-222222222222

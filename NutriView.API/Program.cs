@@ -19,6 +19,7 @@ builder.Services.AddScoped<INutritionService, NutritionService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFoodEntryService, FoodEntryService>();
 builder.Services.AddScoped<IUploadedImageService, UploadedImageService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
 
 var app = builder.Build();
 
