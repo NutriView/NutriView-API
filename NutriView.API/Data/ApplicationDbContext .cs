@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NutriView.API.Models.Entities;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace NutriView.API.Data
 {
@@ -30,9 +28,6 @@ namespace NutriView.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // A NutritionValue is optionally tied to a Food: food macros have a
-            // FoodId, while a user daily goal is a standalone NutritionValue with
-            // FoodId == null. Deleting a food still cascades to its macros.
             modelBuilder.Entity<NutritionValue>()
                 .HasOne(n => n.Food)
                 .WithOne(f => f.NutritionValue)

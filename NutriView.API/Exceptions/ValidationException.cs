@@ -1,5 +1,3 @@
-using System;
-
 namespace NutriView.API.Exceptions
 {
     /// <summary>

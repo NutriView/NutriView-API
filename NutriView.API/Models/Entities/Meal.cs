@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace NutriView.API.Models.Entities
+﻿namespace NutriView.API.Models.Entities
 {
     public class Meal
     {

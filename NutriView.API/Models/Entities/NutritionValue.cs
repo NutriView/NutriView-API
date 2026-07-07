@@ -1,5 +1,4 @@
-﻿using System;
-using NutriView.API.Helpers;
+﻿using NutriView.API.Helpers;
 
 namespace NutriView.API.Models.Entities
 {
