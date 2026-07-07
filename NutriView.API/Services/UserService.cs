@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
+using NutriView.API.Exceptions;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Models.Entities;
 using System.Security.Cryptography;
@@ -58,7 +59,7 @@ namespace NutriView.API.Services
                 .AnyAsync(u => u.Email == dto.Email);
 
             if (exists)
-                throw new Exception("Email already exists");
+                throw new ValidationException("Email already exists");
 
             var user = new User
             {

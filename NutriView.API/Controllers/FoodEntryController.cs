@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NutriView.API.Exceptions;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Services;
 
@@ -48,12 +49,19 @@ namespace NutriView.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var created = await _service.CreateAsync(dto);
+            try
+            {
+                var created = await _service.CreateAsync(dto);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = created.FoodEntryId },
-                created);
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = created.FoodEntryId },
+                    created);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
@@ -65,12 +73,19 @@ namespace NutriView.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updated = await _service.UpdateAsync(id, dto);
+            try
+            {
+                var updated = await _service.UpdateAsync(id, dto);
 
-            if (!updated)
-                return NotFound();
+                if (!updated)
+                    return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>

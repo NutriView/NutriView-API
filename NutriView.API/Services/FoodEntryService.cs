@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
+using NutriView.API.Exceptions;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Models.Entities;
 
@@ -65,7 +66,11 @@ namespace NutriView.API.Services
                 .FirstOrDefaultAsync(f => f.FoodId == dto.FoodId);
 
             if (food == null || food.NutritionValue == null)
-                throw new Exception("Food or nutrition data not found");
+                throw new ValidationException("Food or nutrition data not found");
+
+            var mealExists = await _context.Meals.AnyAsync(m => m.MealId == dto.MealId);
+            if (!mealExists)
+                throw new ValidationException("Meal not found");
 
             var entry = new FoodEntry
             {
@@ -94,6 +99,10 @@ namespace NutriView.API.Services
                 .FirstOrDefaultAsync(fe => fe.FoodEntryId == id);
 
             if (entry == null) return false;
+
+            var mealExists = await _context.Meals.AnyAsync(m => m.MealId == dto.MealId);
+            if (!mealExists)
+                throw new ValidationException("Meal not found");
 
             entry.Quantity = dto.Quantity;
             entry.MealId = dto.MealId;

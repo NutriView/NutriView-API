@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
+using NutriView.API.Exceptions;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Models.Entities;
 
@@ -55,6 +56,10 @@ namespace NutriView.API.Services
 
         public async Task<UploadedImageResponseDTO> CreateAsync(UploadedImageCreateDTO dto)
         {
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            if (!userExists)
+                throw new ValidationException("User not found");
+
             var image = new UploadedImage
             {
                 UploadedImageId = Guid.NewGuid(),
@@ -75,6 +80,13 @@ namespace NutriView.API.Services
         {
             var image = await _context.UploadedImages.FindAsync(id);
             if (image == null) return false;
+
+            if (dto.DetectedFoodId.HasValue)
+            {
+                var foodExists = await _context.Foods.AnyAsync(f => f.FoodId == dto.DetectedFoodId.Value);
+                if (!foodExists)
+                    throw new ValidationException("Detected food not found");
+            }
 
             image.IsProcessed = dto.IsProcessed;
             image.DetectedFoodId = dto.DetectedFoodId;
