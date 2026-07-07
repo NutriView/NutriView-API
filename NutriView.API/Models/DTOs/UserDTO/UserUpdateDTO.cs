@@ -4,6 +4,8 @@ namespace NutriView.API.Models.DTOs
 {
     public class UserUpdateDTO
     {
+        public string NickName { get; set; } = string.Empty;
+
         public int DailyCalorieGoal { get; set; }
 
         public float? Weight { get; set; }

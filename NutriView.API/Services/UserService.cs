@@ -23,6 +23,7 @@ namespace NutriView.API.Services
                 {
                     UserId = u.UserId,
                     Email = u.Email,
+                    NickName = u.NickName,
                     DailyCalorieGoal = u.DailyCalorieGoal,
                     Weight = u.Weight,
                     Height = u.Height,
@@ -42,6 +43,7 @@ namespace NutriView.API.Services
             {
                 UserId = user.UserId,
                 Email = user.Email,
+                NickName = user.NickName,
                 DailyCalorieGoal = user.DailyCalorieGoal,
                 Weight = user.Weight,
                 Height = user.Height,
@@ -62,6 +64,7 @@ namespace NutriView.API.Services
             {
                 UserId = Guid.NewGuid(),
                 Email = dto.Email,
+                NickName = dto.NickName,
                 PasswordHash = HashPassword(dto.Password),
                 CreatedAt = DateTime.UtcNow,
                 DailyCalorieGoal = dto.DailyCalorieGoal,
@@ -77,6 +80,7 @@ namespace NutriView.API.Services
             {
                 UserId = user.UserId,
                 Email = user.Email,
+                NickName = user.NickName,
                 DailyCalorieGoal = user.DailyCalorieGoal,
                 Weight = user.Weight,
                 Height = user.Height,
@@ -90,6 +94,7 @@ namespace NutriView.API.Services
             var user = await _context.Users.FindAsync(id);
             if (user == null) return false;
 
+            user.NickName = dto.NickName;
             user.DailyCalorieGoal = dto.DailyCalorieGoal;
             user.Weight = dto.Weight;
             user.Height = dto.Height;

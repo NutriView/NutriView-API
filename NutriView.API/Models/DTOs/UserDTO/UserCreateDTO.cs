@@ -13,6 +13,9 @@ namespace NutriView.API.Models.DTOs
         [MinLength(6)]
         public string Password { get; set; } = string.Empty;
 
+        [Required]
+        public string NickName { get; set; } = string.Empty;
+
         public int DailyCalorieGoal { get; set; }
 
         public float? Weight { get; set; }

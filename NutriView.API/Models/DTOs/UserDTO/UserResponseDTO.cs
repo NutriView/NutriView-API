@@ -8,6 +8,8 @@ namespace NutriView.API.Models.DTOs
 
         public string Email { get; set; } = string.Empty;
 
+        public string NickName { get; set; } = string.Empty;
+
         public int DailyCalorieGoal { get; set; }
 
         public float? Weight { get; set; }
