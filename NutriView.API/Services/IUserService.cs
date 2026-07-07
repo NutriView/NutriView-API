@@ -9,5 +9,7 @@ namespace NutriView.API.Services
         Task<UserResponseDTO> CreateAsync(UserCreateDTO dto);
         Task<bool> UpdateAsync(Guid id, UserUpdateDTO dto);
         Task<bool> DeleteAsync(Guid id);
+        Task<NutritionValueDTO?> GetNutritionGoalAsync(Guid id);
+        Task<bool> SetNutritionGoalAsync(Guid id, NutritionValueDTO dto);
     }
 }

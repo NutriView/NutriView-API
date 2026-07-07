@@ -91,5 +91,36 @@ namespace NutriView.API.Controllers
 
             return NoContent();
         }
+
+        /// <summary>
+        /// Get the user's daily nutrition goal
+        /// </summary>
+        [HttpGet("{id}/nutrition-goal")]
+        public async Task<IActionResult> GetNutritionGoal(Guid id)
+        {
+            var goal = await _service.GetNutritionGoalAsync(id);
+
+            if (goal == null)
+                return NotFound();
+
+            return Ok(goal);
+        }
+
+        /// <summary>
+        /// Set (create or replace) the user's daily nutrition goal
+        /// </summary>
+        [HttpPut("{id}/nutrition-goal")]
+        public async Task<IActionResult> SetNutritionGoal(Guid id, [FromBody] NutritionValueDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updated = await _service.SetNutritionGoalAsync(id, dto);
+
+            if (!updated)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }

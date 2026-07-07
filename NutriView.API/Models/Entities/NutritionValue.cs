@@ -7,7 +7,9 @@ namespace NutriView.API.Models.Entities
     {
         public Guid NutritionValueId { get; set; }
 
-        public Guid FoodId { get; set; }
+        // Null when this nutrition value is a standalone user daily goal
+        // rather than the macros of a specific food.
+        public Guid? FoodId { get; set; }
 
         public float Calories { get; set; }
 
@@ -25,6 +27,6 @@ namespace NutriView.API.Models.Entities
         public float Alcohol { get; set; } = 0;
         public MeasurementBaseEnum MeasurementBase { get; set; } = MeasurementBaseEnum.Per100g;
 
-        public Food Food { get; set; } = null!;
+        public Food? Food { get; set; }
     }
 }

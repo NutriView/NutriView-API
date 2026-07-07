@@ -30,10 +30,15 @@ namespace NutriView.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // A NutritionValue is optionally tied to a Food: food macros have a
+            // FoodId, while a user daily goal is a standalone NutritionValue with
+            // FoodId == null. Deleting a food still cascades to its macros.
             modelBuilder.Entity<NutritionValue>()
                 .HasOne(n => n.Food)
                 .WithOne(f => f.NutritionValue)
-                .HasForeignKey<NutritionValue>(n => n.FoodId);
+                .HasForeignKey<NutritionValue>(n => n.FoodId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<FoodEntry>()
                 .HasOne(fe => fe.User)
