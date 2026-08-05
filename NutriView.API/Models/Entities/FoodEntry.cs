@@ -14,6 +14,10 @@
 
         public string Unit { get; set; } = "g";
 
+        // Calories snapshotted at entry time from the food's nutrition + quantity,
+        // so later edits to the food don't rewrite historical entries.
+        public float CaloriesAtEntry { get; set; }
+
         public DateTime EntryDate { get; set; }
 
         public DateTime CreatedAt { get; set; }

@@ -32,6 +32,7 @@ namespace NutriView.API.Services
                     MealName = fe.Meal.Name,
                     Quantity = fe.Quantity,
                     Unit = fe.Unit,
+                    Calories = fe.CaloriesAtEntry,
                     EntryDate = fe.EntryDate
                 })
                 .ToListAsync();
@@ -55,6 +56,7 @@ namespace NutriView.API.Services
                 MealName = entry.Meal.Name,
                 Quantity = entry.Quantity,
                 Unit = entry.Unit,
+                Calories = entry.CaloriesAtEntry,
                 EntryDate = entry.EntryDate
             };
         }
@@ -80,6 +82,10 @@ namespace NutriView.API.Services
                 MealId = dto.MealId,
                 Quantity = dto.Quantity,
                 Unit = dto.Unit,
+                CaloriesAtEntry = _nutritionService.CalculateEntryCalories(
+                    food.NutritionValue.Calories,
+                    food.NutritionValue.MeasurementBase,
+                    dto.Quantity),
                 EntryDate = dto.EntryDate,
                 CreatedAt = DateTime.UtcNow
             };
@@ -107,6 +113,15 @@ namespace NutriView.API.Services
             entry.Quantity = dto.Quantity;
             entry.MealId = dto.MealId;
             entry.EntryDate = dto.EntryDate;
+
+            // Re-snapshot calories for the new quantity (food nutrition is included above).
+            if (entry.Food?.NutritionValue != null)
+            {
+                entry.CaloriesAtEntry = _nutritionService.CalculateEntryCalories(
+                    entry.Food.NutritionValue.Calories,
+                    entry.Food.NutritionValue.MeasurementBase,
+                    dto.Quantity);
+            }
 
             await _context.SaveChangesAsync();
             return true;
