@@ -62,6 +62,23 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
+        /// Log in with email and password
+        /// </summary>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _service.LoginAsync(dto);
+
+            if (user == null)
+                return Unauthorized("Invalid email or password");
+
+            return Ok(user);
+        }
+
+        /// <summary>
         /// Update user profile
         /// </summary>
         [HttpPut("{id}")]

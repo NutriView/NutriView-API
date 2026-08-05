@@ -116,6 +116,35 @@ namespace NutriView.API.Services
             };
         }
 
+        public async Task<UserResponseDTO?> LoginAsync(LoginDTO dto)
+        {
+            var user = await _context.Users
+                .Include(u => u.NutritionDailyGoal)
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            if (user == null) return null;
+
+            // Hash the supplied password with the same scheme used at registration
+            // and compare to the stored hash. Returns null on mismatch (no user leak).
+            if (user.PasswordHash != HashPassword(dto.Password))
+                return null;
+
+            return new UserResponseDTO
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                NickName = user.NickName,
+                DailyCalorieGoal = user.DailyCalorieGoal,
+                Weight = user.Weight,
+                Height = user.Height,
+                Age = user.Age,
+                Gender = user.Gender,
+                Image = user.Image,
+                CreatedAt = user.CreatedAt,
+                NutritionDailyGoal = user.NutritionDailyGoal == null ? null : MapNutrition(user.NutritionDailyGoal)
+            };
+        }
+
         public async Task<bool> UpdateAsync(Guid id, UserUpdateDTO dto)
         {
             var user = await _context.Users.FindAsync(id);

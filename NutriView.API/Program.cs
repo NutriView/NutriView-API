@@ -1,10 +1,29 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
 using NutriView.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+const string SpaCorsPolicy = "spa";
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums (Gender, MeasurementBase) as their names instead of
+        // integers so the API contract and generated clients are self-documenting.
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+builder.Services.AddCors(options =>
+{
+    // Allow the Vite dev server (and any SPA origin) to call the API from the browser.
+    // No credentials are used (the client holds the user in localStorage, not cookies).
+    options.AddPolicy(SpaCorsPolicy, policy =>
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
@@ -29,7 +48,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseCors(SpaCorsPolicy);
 app.UseAuthorization();
 app.MapControllers();
 

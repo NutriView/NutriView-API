@@ -7,6 +7,7 @@ namespace NutriView.API.Services
         Task<IEnumerable<UserResponseDTO>> GetAllAsync();
         Task<UserResponseDTO?> GetByIdAsync(Guid id);
         Task<UserResponseDTO> CreateAsync(UserCreateDTO dto);
+        Task<UserResponseDTO?> LoginAsync(LoginDTO dto);
         Task<bool> UpdateAsync(Guid id, UserUpdateDTO dto);
         Task<bool> DeleteAsync(Guid id);
         Task<NutritionValueDTO?> GetNutritionGoalAsync(Guid id);
