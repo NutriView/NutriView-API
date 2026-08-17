@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NutriView.API.Exceptions;
+using NutriView.API.Helpers;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Services;
 
 namespace NutriView.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class FoodController : ControllerBase
     {
@@ -51,7 +54,7 @@ namespace NutriView.API.Controllers
 
             try
             {
-                var created = await _foodService.CreateAsync(dto);
+                var created = await _foodService.CreateAsync(User.GetUserId(), dto);
 
                 return CreatedAtAction(nameof(GetById), new { id = created.FoodId }, created);
             }

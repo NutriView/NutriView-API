@@ -70,7 +70,7 @@ namespace NutriView.API.Services
             };
         }
 
-        public async Task<FoodResponseDTO> CreateAsync(FoodCreateDTO dto)
+        public async Task<FoodResponseDTO> CreateAsync(Guid userId, FoodCreateDTO dto)
         {
             // Prevent duplicate foods in the shared catalog (same name + brand).
             if (dto.IsGlobal)
@@ -97,6 +97,7 @@ namespace NutriView.API.Services
                 Name = dto.Name,
                 Brand = dto.Brand,
                 IsGlobal = dto.IsGlobal,
+                CreatedByUserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 NutritionValue = new NutritionValue
                 {

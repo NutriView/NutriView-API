@@ -1,12 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace NutriView.API.Models.DTOs
 {
     public class FoodEntryCreateDTO
     {
-        [Required]
-        public Guid UserId { get; set; }
-
         [Required]
         public Guid FoodId { get; set; }
 

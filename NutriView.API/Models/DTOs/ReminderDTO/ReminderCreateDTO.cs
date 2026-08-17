@@ -5,9 +5,6 @@ namespace NutriView.API.Models.DTOs
     public class ReminderCreateDTO
     {
         [Required]
-        public Guid UserId { get; set; }
-
-        [Required]
         public int MealId { get; set; }
 
         public TimeSpan TimeOfDay { get; set; }

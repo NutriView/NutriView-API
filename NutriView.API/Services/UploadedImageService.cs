@@ -15,10 +15,11 @@ namespace NutriView.API.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<UploadedImageResponseDTO>> GetAllAsync()
+        public async Task<IEnumerable<UploadedImageResponseDTO>> GetAllByUserAsync(Guid userId)
         {
             return await _context.UploadedImages
                 .Include(i => i.DetectedFood)
+                .Where(i => i.UserId == userId)
                 .Select(i => new UploadedImageResponseDTO
                 {
                     UploadedImageId = i.UploadedImageId,
@@ -33,11 +34,13 @@ namespace NutriView.API.Services
                 .ToListAsync();
         }
 
-        public async Task<UploadedImageResponseDTO?> GetByIdAsync(Guid id)
+        public async Task<UploadedImageResponseDTO?> GetByIdAsync(Guid userId, Guid id)
         {
+            // Scoping by UserId is the ownership check: another user's image is
+            // indistinguishable from one that does not exist.
             var image = await _context.UploadedImages
                 .Include(i => i.DetectedFood)
-                .FirstOrDefaultAsync(i => i.UploadedImageId == id);
+                .FirstOrDefaultAsync(i => i.UploadedImageId == id && i.UserId == userId);
 
             if (image == null) return null;
 
@@ -54,16 +57,17 @@ namespace NutriView.API.Services
             };
         }
 
-        public async Task<UploadedImageResponseDTO> CreateAsync(UploadedImageCreateDTO dto)
+        public async Task<UploadedImageResponseDTO> CreateAsync(Guid userId, UploadedImageCreateDTO dto)
         {
-            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            // A token can outlive the account it was issued for, so the user is still checked.
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
             if (!userExists)
                 throw new ValidationException("User not found");
 
             var image = new UploadedImage
             {
                 UploadedImageId = Guid.NewGuid(),
-                UserId = dto.UserId,
+                UserId = userId,
                 FilePath = dto.FilePath,
                 UploadedAt = DateTime.UtcNow,
                 IsProcessed = false
@@ -72,13 +76,15 @@ namespace NutriView.API.Services
             _context.UploadedImages.Add(image);
             await _context.SaveChangesAsync();
 
-            return await GetByIdAsync(image.UploadedImageId)
+            return await GetByIdAsync(userId, image.UploadedImageId)
                    ?? throw new Exception("Error creating uploaded image");
         }
 
-        public async Task<bool> UpdateAsync(Guid id, UploadedImageUpdateDTO dto)
+        public async Task<bool> UpdateAsync(Guid userId, Guid id, UploadedImageUpdateDTO dto)
         {
-            var image = await _context.UploadedImages.FindAsync(id);
+            var image = await _context.UploadedImages
+                .FirstOrDefaultAsync(i => i.UploadedImageId == id && i.UserId == userId);
+
             if (image == null) return false;
 
             if (dto.DetectedFoodId.HasValue)
@@ -96,9 +102,11 @@ namespace NutriView.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid userId, Guid id)
         {
-            var image = await _context.UploadedImages.FindAsync(id);
+            var image = await _context.UploadedImages
+                .FirstOrDefaultAsync(i => i.UploadedImageId == id && i.UserId == userId);
+
             if (image == null) return false;
 
             _context.UploadedImages.Remove(image);

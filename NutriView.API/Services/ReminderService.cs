@@ -32,11 +32,13 @@ namespace NutriView.API.Services
                 .ToListAsync();
         }
 
-        public async Task<ReminderResponseDTO?> GetByIdAsync(Guid id)
+        public async Task<ReminderResponseDTO?> GetByIdAsync(Guid userId, Guid id)
         {
+            // Scoping by UserId is the ownership check: another user's reminder is
+            // indistinguishable from one that does not exist.
             var reminder = await _context.Reminders
                 .Include(r => r.Meal)
-                .FirstOrDefaultAsync(r => r.ReminderId == id);
+                .FirstOrDefaultAsync(r => r.ReminderId == id && r.UserId == userId);
 
             if (reminder == null) return null;
 
@@ -51,9 +53,10 @@ namespace NutriView.API.Services
             };
         }
 
-        public async Task<ReminderResponseDTO> CreateAsync(ReminderCreateDTO dto)
+        public async Task<ReminderResponseDTO> CreateAsync(Guid userId, ReminderCreateDTO dto)
         {
-            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            // A token can outlive the account it was issued for, so the user is still checked.
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
             if (!userExists)
                 throw new ValidationException("User not found");
 
@@ -64,7 +67,7 @@ namespace NutriView.API.Services
             var reminder = new Reminder
             {
                 ReminderId = Guid.NewGuid(),
-                UserId = dto.UserId,
+                UserId = userId,
                 MealId = dto.MealId,
                 TimeOfDay = dto.TimeOfDay,
                 IsActive = dto.IsActive
@@ -73,13 +76,15 @@ namespace NutriView.API.Services
             _context.Reminders.Add(reminder);
             await _context.SaveChangesAsync();
 
-            return await GetByIdAsync(reminder.ReminderId)
+            return await GetByIdAsync(userId, reminder.ReminderId)
                    ?? throw new Exception("Error creating reminder");
         }
 
-        public async Task<bool> UpdateAsync(Guid id, ReminderUpdateDTO dto)
+        public async Task<bool> UpdateAsync(Guid userId, Guid id, ReminderUpdateDTO dto)
         {
-            var reminder = await _context.Reminders.FindAsync(id);
+            var reminder = await _context.Reminders
+                .FirstOrDefaultAsync(r => r.ReminderId == id && r.UserId == userId);
+
             if (reminder == null) return false;
 
             var mealExists = await _context.Meals.AnyAsync(m => m.MealId == dto.MealId);
@@ -94,9 +99,11 @@ namespace NutriView.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid userId, Guid id)
         {
-            var reminder = await _context.Reminders.FindAsync(id);
+            var reminder = await _context.Reminders
+                .FirstOrDefaultAsync(r => r.ReminderId == id && r.UserId == userId);
+
             if (reminder == null) return false;
 
             _context.Reminders.Remove(reminder);

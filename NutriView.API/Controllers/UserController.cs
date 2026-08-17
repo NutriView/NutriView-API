@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NutriView.API.Exceptions;
+using NutriView.API.Helpers;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Services;
 
 namespace NutriView.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
@@ -17,43 +20,20 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Get all users
+        /// Register a new user and sign them in
         /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var users = await _service.GetAllAsync();
-            return Ok(users);
-        }
-
-        /// <summary>
-        /// Get user by id
-        /// </summary>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var user = await _service.GetByIdAsync(id);
-
-            if (user == null)
-                return NotFound();
-
-            return Ok(user);
-        }
-
-        /// <summary>
-        /// Create new user (register)
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserCreateDTO dto)
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] UserCreateDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                var created = await _service.CreateAsync(dto);
+                var auth = await _service.RegisterAsync(dto);
 
-                return CreatedAtAction(nameof(GetById), new { id = created.UserId }, created);
+                return CreatedAtAction(nameof(GetMe), null, auth);
             }
             catch (ValidationException ex)
             {
@@ -64,30 +44,45 @@ namespace NutriView.API.Controllers
         /// <summary>
         /// Log in with email and password
         /// </summary>
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _service.LoginAsync(dto);
+            var auth = await _service.LoginAsync(dto);
+
+            if (auth == null)
+                return Unauthorized("Invalid email or password");
+
+            return Ok(auth);
+        }
+
+        /// <summary>
+        /// Get the signed-in user's profile
+        /// </summary>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMe()
+        {
+            var user = await _service.GetByIdAsync(User.GetUserId());
 
             if (user == null)
-                return Unauthorized("Invalid email or password");
+                return NotFound();
 
             return Ok(user);
         }
 
         /// <summary>
-        /// Update user profile
+        /// Update the signed-in user's profile
         /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateDTO dto)
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMe([FromBody] UserUpdateDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updated = await _service.UpdateAsync(id, dto);
+            var updated = await _service.UpdateAsync(User.GetUserId(), dto);
 
             if (!updated)
                 return NotFound();
@@ -96,12 +91,12 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Delete user
+        /// Delete the signed-in user's account
         /// </summary>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteMe()
         {
-            var deleted = await _service.DeleteAsync(id);
+            var deleted = await _service.DeleteAsync(User.GetUserId());
 
             if (!deleted)
                 return NotFound();
@@ -110,12 +105,12 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Get the user's daily nutrition goal
+        /// Get the signed-in user's daily nutrition goal
         /// </summary>
-        [HttpGet("{id}/nutrition-goal")]
-        public async Task<IActionResult> GetNutritionGoal(Guid id)
+        [HttpGet("me/nutrition-goal")]
+        public async Task<IActionResult> GetNutritionGoal()
         {
-            var goal = await _service.GetNutritionGoalAsync(id);
+            var goal = await _service.GetNutritionGoalAsync(User.GetUserId());
 
             if (goal == null)
                 return NotFound();
@@ -124,15 +119,15 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Set (create or replace) the user's daily nutrition goal
+        /// Set (create or replace) the signed-in user's daily nutrition goal
         /// </summary>
-        [HttpPut("{id}/nutrition-goal")]
-        public async Task<IActionResult> SetNutritionGoal(Guid id, [FromBody] NutritionValueDTO dto)
+        [HttpPut("me/nutrition-goal")]
+        public async Task<IActionResult> SetNutritionGoal([FromBody] NutritionValueDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updated = await _service.SetNutritionGoalAsync(id, dto);
+            var updated = await _service.SetNutritionGoalAsync(User.GetUserId(), dto);
 
             if (!updated)
                 return NotFound();

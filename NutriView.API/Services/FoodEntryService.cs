@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NutriView.API.Data;
 using NutriView.API.Exceptions;
 using NutriView.API.Models.DTOs;
@@ -38,12 +38,14 @@ namespace NutriView.API.Services
                 .ToListAsync();
         }
 
-        public async Task<FoodEntryResponseDTO?> GetByIdAsync(Guid id)
+        public async Task<FoodEntryResponseDTO?> GetByIdAsync(Guid userId, Guid id)
         {
+            // Scoping by UserId is the ownership check: another user's entry is
+            // indistinguishable from one that does not exist.
             var entry = await _context.FoodEntries
                 .Include(fe => fe.Food)
                 .Include(fe => fe.Meal)
-                .FirstOrDefaultAsync(fe => fe.FoodEntryId == id);
+                .FirstOrDefaultAsync(fe => fe.FoodEntryId == id && fe.UserId == userId);
 
             if (entry == null) return null;
 
@@ -61,7 +63,7 @@ namespace NutriView.API.Services
             };
         }
 
-        public async Task<FoodEntryResponseDTO> CreateAsync(FoodEntryCreateDTO dto)
+        public async Task<FoodEntryResponseDTO> CreateAsync(Guid userId, FoodEntryCreateDTO dto)
         {
             var food = await _context.Foods
                 .Include(f => f.NutritionValue)
@@ -77,7 +79,7 @@ namespace NutriView.API.Services
             var entry = new FoodEntry
             {
                 FoodEntryId = Guid.NewGuid(),
-                UserId = dto.UserId,
+                UserId = userId,
                 FoodId = dto.FoodId,
                 MealId = dto.MealId,
                 Quantity = dto.Quantity,
@@ -93,16 +95,16 @@ namespace NutriView.API.Services
             _context.FoodEntries.Add(entry);
             await _context.SaveChangesAsync();
 
-            return await GetByIdAsync(entry.FoodEntryId)
+            return await GetByIdAsync(userId, entry.FoodEntryId)
                    ?? throw new Exception("Error creating entry");
         }
 
-        public async Task<bool> UpdateAsync(Guid id, FoodEntryUpdateDTO dto)
+        public async Task<bool> UpdateAsync(Guid userId, Guid id, FoodEntryUpdateDTO dto)
         {
             var entry = await _context.FoodEntries
                 .Include(fe => fe.Food)
                 .ThenInclude(f => f.NutritionValue)
-                .FirstOrDefaultAsync(fe => fe.FoodEntryId == id);
+                .FirstOrDefaultAsync(fe => fe.FoodEntryId == id && fe.UserId == userId);
 
             if (entry == null) return false;
 
@@ -127,9 +129,11 @@ namespace NutriView.API.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid userId, Guid id)
         {
-            var entry = await _context.FoodEntries.FindAsync(id);
+            var entry = await _context.FoodEntries
+                .FirstOrDefaultAsync(fe => fe.FoodEntryId == id && fe.UserId == userId);
+
             if (entry == null) return false;
 
             _context.FoodEntries.Remove(entry);

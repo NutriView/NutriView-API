@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NutriView.API.Exceptions;
+using NutriView.API.Helpers;
 using NutriView.API.Models.DTOs;
 using NutriView.API.Services;
 
 namespace NutriView.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class FoodEntryController : ControllerBase
     {
@@ -17,22 +20,22 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Get all food entries for a specific user
+        /// Get all food entries for the signed-in user
         /// </summary>
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMine()
         {
-            var entries = await _service.GetAllByUserAsync(userId);
+            var entries = await _service.GetAllByUserAsync(User.GetUserId());
             return Ok(entries);
         }
 
         /// <summary>
-        /// Get a specific food entry by id
+        /// Get one of the signed-in user's food entries by id
         /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var entry = await _service.GetByIdAsync(id);
+            var entry = await _service.GetByIdAsync(User.GetUserId(), id);
 
             if (entry == null)
                 return NotFound();
@@ -41,7 +44,7 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Create a new food entry
+        /// Create a new food entry for the signed-in user
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] FoodEntryCreateDTO dto)
@@ -51,7 +54,7 @@ namespace NutriView.API.Controllers
 
             try
             {
-                var created = await _service.CreateAsync(dto);
+                var created = await _service.CreateAsync(User.GetUserId(), dto);
 
                 return CreatedAtAction(
                     nameof(GetById),
@@ -65,7 +68,7 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Update an existing food entry
+        /// Update one of the signed-in user's food entries
         /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] FoodEntryUpdateDTO dto)
@@ -75,7 +78,7 @@ namespace NutriView.API.Controllers
 
             try
             {
-                var updated = await _service.UpdateAsync(id, dto);
+                var updated = await _service.UpdateAsync(User.GetUserId(), id, dto);
 
                 if (!updated)
                     return NotFound();
@@ -89,12 +92,12 @@ namespace NutriView.API.Controllers
         }
 
         /// <summary>
-        /// Delete a food entry
+        /// Delete one of the signed-in user's food entries
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _service.DeleteAsync(id);
+            var deleted = await _service.DeleteAsync(User.GetUserId(), id);
 
             if (!deleted)
                 return NotFound();
